@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clínica Veterinaria - Corte 3</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1> Clínica Veterinaria</h1>
+
+    <!-- Panel de login -->
+    <div id="loginPanel">
+        <h2>Login</h2>
+        <select id="rolSelect">
+            <option value="rol_veterinario">Veterinario</option>
+            <option value="rol_recepcion">Recepción</option>
+            <option value="rol_admin">Administrador</option>
+        </select>
+        <div id="vetIdGroup">
+            <label>ID Veterinario (1=López,2=García,3=Méndez,4=Sánchez):</label>
+            <input type="number" id="veterinarioId" value="1" min="1" max="4">
+        </div>
+        <button id="loginBtn">Iniciar sesión</button>
+    </div>
+
+    <!-- Panel de búsqueda de mascotas (para todos) -->
+    <div id="busquedaPanel" style="display:none;">
+        <button id="logoutBtn" style="background:#c0392b;">Cerrar sesión</button>
+        <h2> Búsqueda de mascotas (superficie SQL injection)</h2>
+        <input type="text" id="terminoBusqueda" placeholder="Nombre...">
+        <button id="buscarBtn">Buscar</button>
+        <div id="resultadosBusqueda"></div>
+    </div>
+
+    <!-- Panel de vacunación pendiente (solo vet y admin) -->
+    <div id="vacunacionPanel" style="display:none;">
+        <h2> Vacunación pendiente (caché Redis)</h2>
+        <button id="cargarVacunacionBtn">Cargar lista</button>
+        <div id="resultadosVacunacion"></div>
+    </div>
+
+    <!-- Panel de aplicar vacuna (solo veterinario) -->
+    <div id="vacunaPanel" style="display:none;">
+        <h2> Aplicar nueva vacuna</h2>
+        <label>Mascota: <select id="selectMascota"></select></label><br>
+        <label>Vacuna: <select id="selectVacuna"></select></label><br>
+        <button id="aplicarVacunaBtn">Aplicar</button>
+        <div id="resultadoVacuna"></div>
+    </div>
+
+    <!-- Panel de administración (solo admin) -->
+    <div id="adminPanel" style="display:none;">
+        <hr>
+        <h2> Administración</h2>
+
+        <!-- Gestión de Veterinarios -->
+        <h3> Veterinarios</h3>
+        <div id="listaVeterinarios"></div>
+        <form id="formVeterinario">
+            <input type="text" id="vetNombre" placeholder="Nombre" required>
+            <input type="text" id="vetCedula" placeholder="Cédula" required>
+            <input type="text" id="vetDescanso" placeholder="Días descanso (ej: lunes,jueves)">
+            <button type="submit">Crear Veterinario</button>
+        </form>
+
+        <!-- Gestión de Asignaciones -->
+        <h3> Asignaciones Mascota ↔ Veterinario</h3>
+        <div id="listaAsignaciones"></div>
+        <form id="formAsignacion">
+            <input type="number" id="asignarVetId" placeholder="ID Veterinario" required>
+            <input type="number" id="asignarMascotaId" placeholder="ID Mascota" required>
+            <button type="submit">Asignar Mascota</button>
+        </form>
+
+        <!-- Gestión de Inventario de Vacunas -->
+        <h3>Inventario de Vacunas</h3>
+        <div id="listaInventario"></div>
+        <form id="formVacuna">
+            <input type="text" id="vacunaNombre" placeholder="Nombre" required>
+            <input type="number" id="vacunaStock" placeholder="Stock actual" value="0">
+            <input type="number" id="vacunaMinimo" placeholder="Stock mínimo" value="5">
+            <input type="number" step="0.01" id="vacunaCosto" placeholder="Costo unitario" required>
+            <button type="submit">Crear Vacuna</button>
+        </form>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

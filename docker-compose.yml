@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: clinica_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./schema_corte3.sql:/docker-entrypoint-initdb.d/00_schema_corte3.sql
+      - ./backend/01_procedures.sql:/docker-entrypoint-initdb.d/01_procedures.sql
+      - ./backend/02_triggers.sql:/docker-entrypoint-initdb.d/02_triggers.sql
+      - ./backend/03_views.sql:/docker-entrypoint-initdb.d/03_views.sql
+      - ./backend/04_roles_y_permisos.sql:/docker-entrypoint-initdb.d/04_roles_y_permisos.sql
+      - ./backend/05_rls.sql:/docker-entrypoint-initdb.d/05_rls.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - clinica_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: clinica_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - clinica_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./api
+    container_name: clinica_api
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - clinica_net
+    restart: on-failure
+
+  frontend:
+    image: nginx:alpine
+    container_name: clinica_frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - clinica_net
+    command: /bin/sh -c "echo 'Frontend disponible en http://localhost:8080' && nginx -g 'daemon off;'"
+
+volumes:
+  postgres_data:
+
+networks:
+  clinica_net:

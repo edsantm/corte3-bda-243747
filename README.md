@@ -11,7 +11,8 @@ CREATE POLICY mascotas_veterinario_policy ON mascotas
         SELECT mascota_id FROM vet_atiende_mascota
         WHERE vet_id = current_setting('app.current_veterinario_id', TRUE)::INT
     ) );
-    ```
+```
+
 Explicación:
 La política filtra las filas de mascotas que un veterinario puede ver. Solo muestra aquellas mascotas cuyo id aparezca en la tabla vet_atiende_mascota asociadas al vet_id que el backend ha guardado en la variable de sesión app.current_veterinario_id. Así cada veterinario ve únicamente las mascotas que atiende.
 
